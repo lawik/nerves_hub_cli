@@ -10,6 +10,8 @@ defmodule NervesHubCLI.MixProject do
       version: @version,
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
+      mod: {NervesHubCLI, []},
+      releases: releases(),
       deps: deps(),
       docs: docs(),
       description: description(),
@@ -46,7 +48,24 @@ defmodule NervesHubCLI.MixProject do
       {:nimble_csv, "~> 0.7 or ~> 1.1"},
       {:table_rex, "~> 2.0.0 or ~> 3.0 or ~> 4.0"},
       {:tesla, "~> 1.2.1 or ~> 1.3"},
-      {:x509, "~> 0.3"}
+      {:x509, "~> 0.3"},
+      {:burrito, "~> 1.0"}
+    ]
+  end
+
+  def releases do
+    [
+      nerves_hub_cli: [
+        steps: [:assemble, &Burrito.wrap/1],
+        burrito: [
+          targets: [
+            # macos: [os: :darwin, cpu: :x86_64],
+            macos: [os: :darwin, cpu: :aarch64],
+            linux: [os: :linux, cpu: :x86_64],
+            windows: [os: :windows, cpu: :x86_64]
+          ]
+        ]
+      ]
     ]
   end
 

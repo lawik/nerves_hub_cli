@@ -1,4 +1,6 @@
 defmodule NervesHubCLI do
+  use Application
+
   @moduledoc """
   TBD
   """
@@ -7,6 +9,15 @@ defmodule NervesHubCLI do
   Firmware update public keys can be referred to by their contents.
   """
   @type fwup_public_key_ref :: String.t()
+
+  def start(a, b) do
+    IO.puts("started...")
+    IO.inspect(a, label: "a")
+    IO.inspect(b, label: "b")
+    args = Burrito.Util.Args.argv()
+    IO.inspect(args, label: "args")
+    System.halt(0)
+  end
 
   @spec default_description() :: String.t()
   def default_description() do
