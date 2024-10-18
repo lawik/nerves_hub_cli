@@ -38,7 +38,7 @@ defmodule NervesHubCLI.API.Firmware do
         ) :: {:error, any()} | {:ok, any()}
   def create(org_name, product_name, tar, ttl \\ nil, %Auth{} = auth) do
     params = if ttl != nil, do: %{ttl: ttl}, else: %{}
-    API.file_request(:post, path(org_name, product_name), tar, params, %Auth{} = auth)
+    API.file_request("Uploading firmware", :post, path(org_name, product_name), tar, params, %Auth{} = auth)
   end
 
   @doc """

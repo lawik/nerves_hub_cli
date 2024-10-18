@@ -125,4 +125,39 @@ defmodule NervesHubCLI.CLI.Shell do
   def do_render_error(error) do
     error("Unhandled error: #{inspect(error)}")
   end
+
+  def start_progress_bar(label, total_size, identifier \\ :progress, style \\ :slim) do
+    params = [id: identifier, label: label, total: total_size, timer: true]
+    Owl.ProgressBar.start(params ++ progress_style(style))
+  end
+
+  def start_file_progress_bar(label, total_size, identifier \\ :progress, style \\ :slim) do
+    # Would love to use file_size and the unit to show a nice b/kb/mb type indication but Owl
+    # actually makes that a bit tricky, not bothering for now
+    params = [id: identifier, label: label, total: total_size, absolute_values: true, timer: true]
+    Owl.ProgressBar.start(params ++ progress_style(style))
+  end
+
+  # Box drawing unicode: https://symbl.cc/en/unicode/blocks/box-drawing/
+  defp progress_style(:bold) do
+    [
+      start_symbol: "",
+      partial_symbols: [Data.tag("╾", :cyan), Data.tag("─", :cyan)],
+      filled_symbol: Data.tag("━", :cyan),
+      end_symbol: ""
+    ]
+  end
+
+  defp progress_style(:slim) do
+    [
+      start_symbol: "",
+      partial_symbols: [],
+      filled_symbol: Data.tag("─", :cyan),
+      end_symbol: ""
+    ]
+  end
+
+  def progress(increment \\ 1, identifier \\ :progress) do
+    Owl.ProgressBar.inc(id: identifier, step: increment)
+  end
 end

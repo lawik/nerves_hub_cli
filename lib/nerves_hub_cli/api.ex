@@ -1,9 +1,9 @@
 defmodule NervesHubCLI.API do
   @moduledoc false
   require Logger
+  alias NervesHubCLI.CLI.Shell
 
   @file_chunk 4096
-  @progress_steps 50
 
   @castore_certs CAStore.file_path()
                  |> File.read!()
@@ -55,19 +55,19 @@ defmodule NervesHubCLI.API do
     |> resp()
   end
 
-  def file_request(verb, path, file, params, auth) do
+  def file_request(label, verb, path, file, params, auth) do
     content_length = :filelib.file_size(file)
-    {:ok, pid} = Agent.start_link(fn -> 0 end)
+    if progress?() do
+      Shell.start_file_progress_bar(label, content_length)
+    end
 
     stream =
       file
       |> File.stream!([], @file_chunk)
       |> Stream.each(fn chunk ->
-        Agent.update(pid, fn sent ->
-          size = sent + byte_size(chunk)
-          if progress?(), do: put_progress(size, content_length)
-          size
-        end)
+        if progress?() do
+          Shell.progress(byte_size(chunk))
+        end
       end)
 
     mp =
@@ -126,22 +126,6 @@ defmodule NervesHubCLI.API do
   defp server_name_indication do
     Application.get_env(:nerves_hub_cli, :server_name_indication) ||
       Application.get_env(:nerves_hub_cli, :host) |> to_charlist()
-  end
-
-  def put_progress(size, max) do
-    fraction = size / max
-    completed = trunc(fraction * @progress_steps)
-    percent = trunc(fraction * 100)
-    unfilled = @progress_steps - completed
-
-    IO.write(
-      :stderr,
-      "\r|#{String.duplicate("=", completed)}#{String.duplicate(" ", unfilled)}| #{percent}% (#{bytes_to_mb(size)} / #{bytes_to_mb(max)}) MB"
-    )
-  end
-
-  defp bytes_to_mb(bytes) do
-    trunc(bytes / 1024 / 1024)
   end
 
   defp progress?() do
