@@ -93,7 +93,7 @@ defmodule NervesHubCLI.CLI.User do
   end
 
   def auth(opts) do
-    username_or_email = Shell.prompt("Username or email address:") |> String.trim()
+    username_or_email = Shell.prompt("E-mail address:") |> String.trim()
     password = Shell.password_get("NervesHub password:") |> String.trim()
     Shell.info("Authenticating...")
 

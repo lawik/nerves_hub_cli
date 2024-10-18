@@ -5,6 +5,7 @@ defmodule NervesHubCLI.CLI do
 
   def main([command | args]) when command in @valid_commands do
     case command do
+      "help" -> main([])
       "ca_certificate" -> NervesHubCLI.CLI.CaCertificate.run(args)
       "deployment" -> NervesHubCLI.CLI.Deployment.run(args)
       "device" -> NervesHubCLI.CLI.Device.run(args)
@@ -22,7 +23,7 @@ defmodule NervesHubCLI.CLI do
     This is nerves_hub CLI, the command line app to manage NervesHub resources.
 
     Usage:
-      #{executable()} <command> <subcommand> [flags] 
+      #{executable()} <command> <subcommand> [flags]
 
     Commands:
       user:           Manage the signed in NervesHub user

@@ -16,6 +16,7 @@ defmodule NervesHubCLI.CLI.Bulk do
 
     _ = Enum.each(malformed, &display_malformed(&1, csv_path))
 
+
     Shell.info("""
     Results:
       #{IO.ANSI.yellow()}malformed: #{length(malformed)}

@@ -71,3 +71,11 @@ NervesHubCLI must be configured to connect to your chosen NervesHub host.
 See the
 [documentation](https://docs.nerves-hub.org/nerves-hub/setup/connecting-other-envs)
 for example config values to do this.
+
+## Development
+
+To test the escript during development you can use something like this:
+
+```
+mix escript.build && ./nerves_hub user whoami
+```

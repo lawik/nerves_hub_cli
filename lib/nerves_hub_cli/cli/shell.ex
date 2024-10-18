@@ -1,18 +1,19 @@
 defmodule NervesHubCLI.CLI.Shell do
   alias NervesHubCLI.CLI.Utils
+  alias Owl.IO
+  alias Owl.Data
 
   @spec info(IO.ANSI.ansidata()) :: :ok
   def info(message) do
-    IO.puts(IO.ANSI.format(message))
+    message
+    |> IO.puts()
   end
 
   @spec error(IO.ANSI.ansidata()) :: :ok
   def error(message) do
-    IO.puts(:stderr, IO.ANSI.format(red(message)))
-  end
-
-  defp red(message) do
-    [:red, :bright, message]
+    message
+    |> Data.tag(:red)
+    |> IO.puts(:stderr)
   end
 
   @spec raise(String.t()) :: no_return()
@@ -23,18 +24,16 @@ defmodule NervesHubCLI.CLI.Shell do
 
   @spec prompt(String.t()) :: String.t()
   def prompt(message) do
-    IO.gets(message <> " ")
-    |> String.trim()
+    IO.input(label: message, cast: :string)
   end
 
   @spec yes?(String.t()) :: boolean()
   def yes?(message) do
     System.get_env("NERVES_HUB_NON_INTERACTIVE") ||
-      IO.ANSI.format([message, :yellow, " yN "])
-      |> IO.gets()
-      |> then(fn resp ->
-        is_binary(resp) and String.trim(resp) in ["y", "Y", "yes", "YES", "Yes"]
-      end)
+      IO.confirm(message: message, answers: [
+        true: {"y", ["Y", "yes", "YES", "Yes"]},
+        false: {"n", ["N", "no", "NO", "No"]},
+      ])
   end
 
   @spec request_auth() :: NervesHubCLI.API.Auth.t() | nil
@@ -70,8 +69,7 @@ defmodule NervesHubCLI.CLI.Shell do
   # clearing the line with stderr
   @spec password_get(String.t()) :: String.t()
   def password_get(prompt) do
-    password_clean(prompt)
-    |> String.trim()
+    IO.input(label: prompt, secret: true, cast: :string)
   end
 
   @dialyzer [{:no_return, render_error: 1}, {:no_fail_call, render_error: 1}]
@@ -126,28 +124,5 @@ defmodule NervesHubCLI.CLI.Shell do
 
   def do_render_error(error) do
     error("Unhandled error: #{inspect(error)}")
-  end
-
-  defp password_clean(prompt) do
-    pid = spawn_link(fn -> loop(prompt) end)
-    ref = make_ref()
-    value = IO.gets(prompt <> " ")
-
-    send(pid, {:done, self(), ref})
-    receive do: ({:done, ^pid, ^ref} -> :ok)
-
-    value
-  end
-
-  defp loop(prompt) do
-    receive do
-      {:done, parent, ref} ->
-        send(parent, {:done, self(), ref})
-        IO.write(:standard_error, "\e[2K\r")
-    after
-      1 ->
-        IO.write(:standard_error, "\e[2K\r#{prompt} ")
-        loop(prompt)
-    end
   end
 end
