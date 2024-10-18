@@ -1,19 +1,19 @@
 defmodule NervesHubCLI.CLI.Shell do
   alias NervesHubCLI.CLI.Utils
-  alias Owl.IO
+  alias Owl.IO, as: OIO
   alias Owl.Data
 
   @spec info(IO.ANSI.ansidata()) :: :ok
   def info(message) do
     message
-    |> IO.puts()
+    |> OIO.puts()
   end
 
   @spec error(IO.ANSI.ansidata()) :: :ok
   def error(message) do
     message
     |> Data.tag(:red)
-    |> IO.puts(:stderr)
+    |> OIO.puts(:stderr)
   end
 
   @spec raise(String.t()) :: no_return()
@@ -24,13 +24,13 @@ defmodule NervesHubCLI.CLI.Shell do
 
   @spec prompt(String.t()) :: String.t()
   def prompt(message) do
-    IO.input(label: message, cast: :string)
+    OIO.input(label: message, cast: :string)
   end
 
   @spec yes?(String.t()) :: boolean()
   def yes?(message) do
     System.get_env("NERVES_HUB_NON_INTERACTIVE") ||
-      IO.confirm(message: message, answers: [
+      OIO.confirm(message: message, answers: [
         true: {"y", ["Y", "yes", "YES", "Yes"]},
         false: {"n", ["N", "no", "NO", "No"]},
       ])
@@ -69,7 +69,7 @@ defmodule NervesHubCLI.CLI.Shell do
   # clearing the line with stderr
   @spec password_get(String.t()) :: String.t()
   def password_get(prompt) do
-    IO.input(label: prompt, secret: true, cast: :string)
+    OIO.input(label: prompt, secret: true, cast: :string)
   end
 
   @dialyzer [{:no_return, render_error: 1}, {:no_fail_call, render_error: 1}]
